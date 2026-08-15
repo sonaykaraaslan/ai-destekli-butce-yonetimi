@@ -5,7 +5,7 @@
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat&logo=docker)](https://docker.com)
 [![Tests](https://img.shields.io/badge/pytest-17%20passed-brightgreen)](backend/tests)
 
-Türk aileler için gelir, gider ve fatura takibi; multi-agent AI bütçe analizi; EasyOCR ile fatura fotoğrafından otomatik okuma (Zor Mod).
+Aileler için gelir, gider ve fatura takibi; multi-agent AI bütçe analizi; EasyOCR ile fatura fotoğrafından otomatik okuma (Zor Mod).
 
 ---
 
