@@ -1,411 +1,319 @@
 # AI Günlüğü — AileFinans Geliştirme Süreci
 
 **Proje:** AI-Powered Family Budget Management System (AileFinans)  
-**Geliştirici:** Sonay  
+**Geliştirici:** Sonay Karaaslan  
 **Dönem:** Ağustos 2026
 
-> Bu günlük, projeye **doğrudan kod yazarak değil**; önce araştırma yaparak başladığım süreci anlatır. ChatGPT, Gemini, Claude'a sorduğum sorular, aileyle konuşmalarım ve en son Cursor'a geçtiğim aşama burada kayıt altında. Prompt'ları olduğu gibi değil, **o an ne düşündüğümü anlatan yorum havasında** yazdım — hoca okurken "gerçekten ben mi yaptım" hissi versin diye.
+Bu günlük, projenin planlama aşamasından teslimine kadar kullanılan yapay zeka araçlarını, yazılan prompt'ları ve hangi kararların AI tarafından, hangilerinin geliştirici tarafından verildiğini kayıt altına alır. Prompt'lar özetlenmiş ve her adımın altında kısa geliştirici notu bulunur.
 
 ---
 
-## Bölüm 0 — Cursor'dan Önce: "Ne Yapsam Ki?"
+## Bölüm 0 — Cursor'dan Önce: Araştırma ve Planlama
 
-### 0.1 İlk adım: Hocanın projelerine bakmak
+### 0.1 Proje konusunun belirlenmesi
 
-Cursor'u açmadan önce yaptığım ilk şey hocanın daha önce onayladığı veya sınıfta gösterdiği projelere göz atmaktı. Kendime şunu sordum:
+Geliştirmeye başlamadan önce dönem projesi gereksinimlerini (analiz dokümanı, teknik doküman, demo, AI entegrasyonu) inceledim. Daha önce incelenmiş örnek projelere bakarak hangi konunun bu kriterleri karşılayabileceğini değerlendirdim.
 
-- Hangisi en iyi notu almış gibi duruyor?
-- Hangisinde "AI" kelimesi geçiyor ama yapılması gerçekten zor değil?
-- Ben hangisini **en kısa sürede** bitirebilirim?
+Değerlendirme kriterlerim:
+- Günlük hayatta anlaşılır bir problem alanı
+- CRUD, raporlama ve grafik gibi temel yazılım becerilerini gösterebilme
+- Multi-agent AI ve OCR gibi ileri özellikler eklenebilirlik
+- Demo ortamında sorunsuz çalışabilirlik
 
-Elimde GTech dönem projesi gereksinimleri vardı: analiz dokümanı, teknik doküman, demo, AI kullanımı… Sadece "çalışan bir site" yetmezdi; **hikâyesi olan** bir proje lazımdı.
-
-Aile bütçesi fikri aklıma yatkın geldi çünkü:
-- Herkesin anlayacağı bir domain (para, fatura, tasarruf)
-- Grafik, CRUD, rapor — hocanın görmek istediği teknik derinlik var
-- "Multi-agent AI" ve "OCR ile fatura okuma" ile **zor mod** hakkını da kullanabilirdim
+**Aile bütçe yönetimi** bu kriterlere uygun bulundu: gelir/gider/fatura takibi herkesin ilişkilenebileceği bir domain; dashboard ve raporlar teknik derinlik sağlıyor; OCR ve multi-agent analiz proje gereksinimlerindeki AI bileşenini karşılıyor.
 
 ---
 
-### 0.2 ChatGPT'ye ilk sorular (fikir aşaması)
+### 0.2 ChatGPT — fikir ve teknoloji araştırması
 
-Cursor yokken ChatGPT'yi bir **beyin fırtınası ortağı** gibi kullandım. Kabaca şöyle yazdım:
+**Prompt 1 — Proje seçimi**
 
----
+> GTech dönem projesi yapacağım. AI içeren, web tabanlı, demo'su kolay bir proje arıyorum. Aile bütçe yönetimi mantıklı mı? Buna benzer 3 alternatif fikir de ver; makul sürede tamamlanabilecek öneriler olsun.
 
-**Prompt 1 — Proje seçimi (ChatGPT)**
-
-> GTech dönem projesi yapacağım. Hocanın önceki projelerine baktım. AI içeren, web tabanlı, demo'su kolay bir proje lazım. Aile bütçe yönetimi mantıklı mı sence? Buna benzer alternatif 3 fikir de ver, ama **2 haftada bitirebileceğim** şeyler olsun.
-
-**Ne düşündüm:** ChatGPT genelde her fikre "harika" der; ben asıl **alternatifleri karşılaştırmak** için sordum. Cevapta e-ticaret, randevu sistemi, bütçe uygulaması gibi seçenekler geldi. Bütçe uygulaması hem AI hem OCR hikâyesine en çok uyanıydı.
+**Not:** ChatGPT e-ticaret, randevu sistemi ve bütçe uygulaması gibi alternatifler önerdi. Bütçe uygulaması AI analiz ve OCR gereksinimleriyle en uyumlu seçenek olarak değerlendirildi.
 
 ---
 
-**Prompt 2 — Teknoloji seçimi (ChatGPT)**
+**Prompt 2 — Teknoloji seçimi**
 
-> Python mu Node mu backend için? SQLite yeterli mi yoksa PostgreSQL şart mı? Hoca kendi bilgisayarında `docker compose up` ile çalıştırabilsin istiyorum. React mı Vue mu frontend?
+> Backend için Python mu Node mu? SQLite yeterli mi yoksa PostgreSQL gerekir mi? Değerlendirici `docker compose up` ile projeyi çalıştırabilsin istiyorum. Frontend için React mi Vue mu?
 
-**Ne düşündüm:** Hocanın kurulum derdi yaşamaması **en kritik kısıttı**. PostgreSQL + ayrı servisler = demo gecikmesi. SQLite tek dosya, Docker volume ile taşınır — bu kararı burada netleştirdim.
-
----
-
-**Prompt 3 — Multi-agent gerçekten gerekli mi? (ChatGPT)**
-
-> Projede "multi-agent AI" yazmam lazım. Gerçekten OpenAI API mi kullanmalıyım yoksa kural tabanlı ajanlar (planner, expense analyzer, reviewer) yeterli sayılır mı? Akademik teslim için hangisi daha mantıklı?
-
-**Ne düşündüm:** API key, ücret, internet bağımlılığı… Demo günü "API limiti doldu" demek istemezdim. ChatGPT hem LLM hem kural tabanlı yol gösterdi; **mimari olarak multi-agent, implementasyon olarak kural tabanlı** kararı burada şekillendi.
+**Not:** Demo kolaylığı kritik kısıt olarak belirlendi. SQLite tek dosya olduğu için Docker volume ile taşınabilir; ayrı veritabanı servisi kurulum yükünü artırır.
 
 ---
 
-### 0.3 Gemini'ye sorduklarım (mimari karşılaştırma)
+**Prompt 3 — Multi-agent yaklaşımı**
 
-Gemini'yi daha çok **tablo halinde karşılaştırma** için kullandım:
+> Projede multi-agent AI mimarisi olmalı. OpenAI API mi kullanmalıyım yoksa kural tabanlı ajanlar (planner, expense analyzer, reviewer) yeterli mi? Akademik teslim ve offline demo açısından hangisi daha uygun?
 
----
-
-**Prompt 4 — Mimari karşılaştırma (Gemini)**
-
-> FastAPI + React + SQLite mimarisi ile Django monolith + SQLite mimarisini karşılaştır. Kurulum kolaylığı, demo, OCR (EasyOCR) entegrasyonu, öğrenci projesi uygunluğu açısından puanla.
-
-**Yorumum:** Gemini Django tarafında admin panel avantajını söyledi. Benim derdim admin değil, **modern SPA + API docs (Swagger)** göstermekti. FastAPI `/docs` ile hocaya "bak API sözleşmem hazır" diyebilirdim — o yüzden FastAPI kazandı.
+**Not:** API anahtarı, maliyet ve internet bağımlılığı değerlendirildi. **Mimari olarak multi-agent, uygulama olarak kural tabanlı ajanlar** kararı bu aşamada alındı.
 
 ---
 
-**Prompt 5 — OCR zor mu? (Gemini)**
+### 0.3 Gemini — mimari karşılaştırma
 
-> Türkçe elektrik faturası fotoğrafından tutar ve son ödeme tarihi okumak için EasyOCR mi Tesseract mı? CPU'da çalışsın, Docker'da şişmesin istiyorum.
+**Prompt 4 — Framework karşılaştırması**
 
-**Yorumum:** EasyOCR Türkçe desteği ve hazır pipeline ile öne çıktı. "Zor mod" etiketini buradan aldım — hocaya **fotoğraf yükleyince okuyor** demek etkileyici.
+> FastAPI + React + SQLite ile Django monolith + SQLite mimarisini karşılaştır. Kurulum kolaylığı, demo, EasyOCR entegrasyonu ve öğrenci projesi uygunluğu açısından değerlendir.
 
----
-
-### 0.4 Claude'a sorduklarım (kapsam ve risk)
-
-Claude'u biraz daha **"acımasız danışman"** gibi kullandım — fazla feature eklememi engellesin diye:
+**Not:** Django admin panel avantajı belirtildi; ancak SPA + otomatik API dokümantasyonu (Swagger) hedeflendiği için FastAPI tercih edildi.
 
 ---
 
-**Prompt 6 — Kapsam kontrolü (Claude)**
+**Prompt 5 — OCR teknolojisi**
 
-> 2 haftada yetişecek aile bütçe projesi planlıyorum: gelir/gider/fatura CRUD, dashboard, 5 ajanlı analiz, OCR, aile bütçesi, tasarruf hedefi, chatbot, Docker. Bu liste delilik mi? MVP için ne kesilmeli?
+> Türkçe elektrik faturası fotoğrafından tutar ve son ödeme tarihi okumak için EasyOCR mi Tesseract mı? CPU'da çalışsın, Docker imajı mümkün olduğunca küçük kalsın.
 
-**Yorumum:** Claude "banka entegrasyonu, gerçek LLM, mobil app kes" dedi. Aile bütçesini **rol sistemi olmadan basit havuz** olarak tutmamı önerdi — sonra Cursor'da birebir böyle yaptık.
-
----
-
-**Prompt 7 — Docker stratejisi (Claude)**
-
-> Hoca Python/Node kurmasın diye Docker Compose düşünüyorum. EasyOCR + PyTorch image'ı çok şişer mi? CPU-only torch kullanmak mantıklı mı?
-
-**Yorumum:** Bu soru sonradan Cursor'da yaşadığımız **pip timeout / CUDA indirme** kabusunu önceden görmemi sağladı. Claude CPU torch dedi; Docker build'de gerçekten CUDA paketleri yüzünden patladık, sonra aynı çözümü uyguladık.
+**Not:** EasyOCR Türkçe desteği ve hazır pipeline nedeniyle seçildi. Projedeki "Zor Mod" OCR modülü bu kararla şekillendi.
 
 ---
 
-### 0.5 Aileyle konuşma (insan katmanı)
+### 0.4 Claude — kapsam ve risk analizi
 
-AI'lar teknik cevap verdi; **aileyle konuşunca** proje gerçek hayata oturdu:
+**Prompt 6 — Kapsam kontrolü**
 
-- Annem: *"Fatura tarihini unutuyoruz, hatırlatsın."* → `.ics` takvim fikri
-- Babam: *"Kim ne kadar katkı veriyor görelim."* → Aile gelir havuzu
-- Kardeşim: *"Laptop almak için ne kadar biriktirmem lazım?"* → Tasarruf hedefi + Goal Coach
+> Aile bütçe projesi planlıyorum: gelir/gider/fatura CRUD, dashboard, 5 ajanlı analiz, OCR, aile bütçesi, tasarruf hedefi, chatbot, Docker. Bu kapsam makul mu? MVP için ne kesilmeli?
 
-Bu yüzden AI günlüğünde sadece "ChatGPT dedi" yok — **insan geri bildirimi** de mimariyi şekillendirdi.
+**Not:** Banka entegrasyonu, gerçek LLM ve native mobil uygulama kapsam dışı bırakıldı. Aile bütçesi modülü rol sistemi olmadan basit gelir havuzu olarak tasarlandı.
 
 ---
 
-### 0.6 Nihai karar (Cursor'dan önce)
+**Prompt 7 — Docker stratejisi**
 
-| Konu | Karar | Kim etkiledi |
-|------|-------|--------------|
-| Proje konusu | Aile bütçe + AI | Ben + ChatGPT alternatifleri |
+> Değerlendirici Python/Node kurmasın diye Docker Compose kullanmayı planlıyorum. EasyOCR + PyTorch imajı çok büyür mü? CPU-only torch mantıklı mı?
+
+**Not:** Bu analiz sonradan yaşanan pip timeout / CUDA paket indirme sorununa hazırlık sağladı. CPU-only PyTorch çözümü build aşamasında uygulandı.
+
+---
+
+### 0.5 Kullanıcı geri bildirimi (aile)
+
+Teknik AI araçlarına ek olarak, günlük kullanım senaryoları aile içi görüşmelerle netleştirildi:
+
+- Fatura son ödeme tarihi hatırlatması → `.ics` takvim entegrasyonu
+- Aile üyelerinin gelir katkılarının görünmesi → Gelir havuzu modülü
+- Birikim hedefi takibi → Tasarruf hedefleri + Goal Coach
+
+---
+
+### 0.6 Nihai karar tablosu (Cursor öncesi)
+
+| Konu | Karar | Etkileyen kaynak |
+|------|-------|------------------|
+| Proje konusu | Aile bütçe + AI | Gereksinim analizi + ChatGPT |
 | Backend | FastAPI | Gemini karşılaştırma |
-| Frontend | React + Vite + Tailwind | ChatGPT + kişisel tercih |
-| Veritabanı | SQLite | Hoca kolay demo kısıtı |
-| AI | Multi-agent, kural tabanlı | ChatGPT + Claude kapsam |
-| OCR | EasyOCR (Zor Mod) | Gemini |
-| Dağıtım | Docker Compose | Claude + hoca gereksinimi |
-| Aile modülü | Basit havuz, rol yok | Claude + kullanıcı mesajı |
+| Frontend | React + Vite + Tailwind | ChatGPT + geliştirici tercihi |
+| Veritabanı | SQLite | Demo taşınabilirliği |
+| AI | Multi-agent, kural tabanlı | ChatGPT + Claude |
+| OCR | EasyOCR | Gemini |
+| Dağıtım | Docker Compose | Claude + demo gereksinimi |
+| Aile modülü | Basit havuz, rol yok | Claude + geliştirici kararı |
 
-**Cursor'a geçiş anı:** Mimari kafamda netleşince "artık kod yazma zamanı" deyip Cursor'u açtım. İlk mesajım proje tanımının tamamını yapıştırmaktı — aşağıda.
-
----
-
-## Bölüm 1 — Cursor'da Geliştirme: Prompt Günlüğü
-
-> Buradan sonrası Cursor Composer ile olan diyalog. Her prompt'u **o anki halimle** yazdım; resmi dil değil, gerçekten yazdığım gibi.
+Mimari netleştikten sonra kod geliştirmesi için Cursor IDE kullanılmaya başlandı.
 
 ---
 
-### Gün 1 — Proje kickoff
+## Bölüm 1 — Cursor ile Geliştirme: Prompt Günlüğü
 
-**Prompt 8 (Cursor — ilk mesaj)**
+### Gün 1 — Proje başlangıcı
 
-> Proje adı: AI-Powered Family Budget Management System. Gelir gider fatura takibi, multi-agent AI analiz, mobil uyumlu dashboard, SQLite… *(hoca PDF'inde yazan tüm gereksinimleri yapıştırdım)*
+**Prompt 8 — İlk mesaj (proje tanımı)**
 
-**Yorum:** İlk gün "her şeyi bir seferde istedim" modundaydım. Cursor iskeleti çıkardı: FastAPI router'lar, React sayfalar, seed, JWT. Mimari kararlarımın kod karşılığını görmek iyi hissettirdi.
+> Proje adı: AI-Powered Family Budget Management System. Gelir, gider, fatura takibi; multi-agent AI analiz; mobil uyumlu dashboard; SQLite… *(ders gereksinimlerindeki maddeler)*
 
----
-
-**Prompt 9**
-
-> Kanka db'de tutmak zorunda mıyız görselleri vb çünkü hoca kendi bilgisayarında nasıl görebilecek
-
-**Yorum:** Demo'da "fotoğraf yükledim ama hocada yok" felaketi olmasın diye sordum. Upload klasörü + Docker volume mantığı burada netleşti.
+**Not:** Proje iskeleti oluşturuldu: FastAPI router'lar, React sayfalar, JWT auth, demo seed verisi.
 
 ---
 
-**Prompt 10** *(fatura OCR örneği ekran görüntüsüyle)*
+**Prompt 9 — Görsel depolama**
 
-> Olur böylelikle projeye de başlayalım hem aynı zamanda şunu da istiyor hoca — zor olur mu sence?
+> Yüklenen görselleri veritabanında mı tutmalıyız? Değerlendirici kendi ortamında yüklenen fatura fotoğraflarını görebilmeli.
 
-**Yorum:** Hocanın istediği OCR örneğini SS atınca "zor mod" resmileşti. EasyOCR entegrasyonu bu prompt'tan sonra ciddi şekilde başladı.
-
----
-
-**Prompt 11**
-
-> Terminale baksana — resmi yükleyince elektrik faturasını okuyamıyor galiba
-
-**Yorum:** İlk OCR denemesi çuvalladı. AI log'a bakıp regex ve preprocessing düzeltti. Gerçek geliştirmede en çok vakit buraya gitti.
+**Not:** Dosya sistemi (`uploads/`) + Docker volume yaklaşımı benimsendi.
 
 ---
 
-**Prompt 12** *(yanlış okunan fatura SS)*
+**Prompt 10 — OCR gereksinimi** *(örnek fatura ekran görüntüsüyle)*
 
-> Yanlış mı okunmuş ne olmuş anlamadım — aynı zamanda profesyonel dashboard biraz grafikler ekle vb profesyonel yap
+> Bu OCR özelliğini projeye ekleyelim. Hocanın istediği zor mod kapsamında uygulanabilir mi?
 
-**Yorum:** OCR hâlâ şaşırıyordu ama dashboard'u toparlamak moral verdi. Recharts, KPI kartları bu dönemde geldi.
+**Not:** EasyOCR entegrasyonu bu aşamada başlatıldı.
 
 ---
 
-### Gün 1 gece — Chatbot ve isimlendirme
+**Prompt 11 — OCR hata ayıklama**
+
+> Fatura fotoğrafı yükledim ama elektrik faturası okunmuyor, terminale bakar mısın?
+
+**Not:** Regex ve görüntü ön işleme iyileştirildi. OCR geliştirmesi en fazla iterasyon gerektiren modül oldu.
+
+---
+
+**Prompt 12 — OCR + dashboard** *(hatalı okuma ekran görüntüsü)*
+
+> Okuma sonucu yanlış görünüyor, kontrol eder misin? Ayrıca dashboard'a grafikler ekleyerek daha profesyonel hale getir.
+
+**Not:** Recharts ile KPI kartları ve grafikler eklendi.
+
+---
+
+### Gün 1 — Chatbot ve isimlendirme
 
 **Prompt 13**
 
-> Senden bir de sağ alta chatbot yapmanı istiyorum — ufak gözüksün, "merhaba nasıl yardımcı olabilirim" gibi. Gelirimi hesaplamak istiyorum derse ilgili sayfaya yönlendir, iş bitince güle güle desin. AI analiz kısmında "AI analiz" değil özel isim ver — sonu yine AI olsun. Agent adımları değil başka bir şey yaz.
+> Sağ alta küçük bir chatbot ekle: karşılama mesajı, gelir/gider/fatura gibi isteklerde ilgili sayfaya yönlendirme, oturum bitince vedalaşma. AI analiz sayfasına özel isim ver (sonu AI ile bitsin). "Agent adımları" yerine farklı bir etiket kullan.
 
-**Yorum:** "FinansKoç AI" ve "FinansMate" isimleri buradan çıktı. Chatbot'un backend'e bağlanmaması bilinçli — sadece navigasyon botu, demo'da hızlı.
-
----
-
-**Prompt 14** *(Boğaziçi Elektrik fatura örneği)*
-
-> Sanırım metin tam okunmuyor — örneğin fatura şuydu *(gerçek fatura SS)*
-
-**Yorum:** En kritik OCR iterasyonu. AI crop + regex iyileştirdi. İnsan olarak ben faturayı bilerek gösterdim — "doğru cevap bu, buna yaklaş" demiş oldum.
+**Not:** **FinansKoç AI** ve **FinansMate** isimleri bu aşamada belirlendi. Chatbot yalnızca navigasyon amaçlı, backend AI API'sine bağlı değil.
 
 ---
 
-**Prompt 15**
+**Prompt 14 — OCR iyileştirme** *(Boğaziçi Elektrik fatura örneği)*
 
-> Başka özellikler de ekleyebilirsin mantıklı olacak şekilde profesyonel olsun
+> Metin tam okunmuyor gibi. Referans fatura ekran görüntüsü ekliyorum, buna göre düzelt.
 
-**Yorum:** Biraz serbest bıraktım. KDV özeti, export, sözleşme takibi fikirleri bu açıklıkla geldi.
-
----
-
-**Prompt 16** *(uzun feature listesi — KDV, Excel, takvim, taahhüt)*
-
-> KDV gider özeti, Excel/CSV/PDF export, son ödeme takvime eklensin, taahhüt bitiş uyarısı…
-
-**Yorum:** ChatGPT/Claude'da düşündüğüm kurumsal özellikleri Cursor'a döktüm. Hepsi bir gecede değil ama roadmap gibi işledi.
+**Not:** Crop alanları ve regex kuralları gerçek fatura örneğine göre güncellendi.
 
 ---
 
-**Prompt 17**
+**Prompt 15–16 — Ek özellikler**
 
-> Aile Ortak Bütçesi — Baba 25.000, Anne 20.000… Ama 1 günlük MVP'de gerçek kullanıcı/rol sistemi yapma, sadece ortak bütçe mantığında tut.
+> Mantıklı ek özellikler ekle: KDV özeti, CSV/PDF export, takvime hatırlatıcı (.ics), taahhüt bitiş uyarısı…
 
-**Yorum:** Claude'un "rol sistemi yapma" uyarısını aynen Cursor'a taşıdım. Doğru karar — yetişirdi yoksa.
-
----
-
-**Prompt 18**
-
-> Aile bütçesini mantıklı düzenle. Tasarruf hedefleri, ilerleme çubuğu, AI Hedef Koçu mesajları… Dashboard daha modern olsun kayan şeyler olabilir.
-
-**Yorum:** Goal Coach backend'de kural tabanlı yazıldı. Carousel/dashboard animasyonları eklendi.
+**Not:** Kurumsal kullanım senaryolarına yönelik raporlama ve export modülleri eklendi.
 
 ---
 
-### Gün 2 — UI iterasyonları (insan düzeltmeleri ağırlıklı)
+**Prompt 17–18 — Aile bütçesi ve tasarruf hedefleri**
 
-**Prompt 19:** *Biraz küçük yap yazıları*  
-**Prompt 20:** *Hafif büyült*  
-**Yorum:** Klasik UI ping-pong. AI abartınca geri aldım.
+> Aile ortak bütçesi: üye katkıları, toplam havuz. Rol sistemi olmasın, basit havuz mantığı yeterli. Tasarruf hedefleri, ilerleme çubuğu, hedef koçu mesajları. Dashboard'u modernleştir.
 
----
-
-**Prompt 21**
-
-> Girmeden önce Cloudflare koyalım
-
-**Prompt 22:** *(Cloudflare hata SS)* *Ne lan bu*  
-**Prompt 23:** *Localhost domainini ekleyemez miyiz*  
-**Prompt 24:** *Cloudflare yerine doğrulama koy — sayı toplama gibi, Cloudflare kısmını kaldır*
-
-**Yorum:** Cloudflare Turnstile localhost'ta saçmaladı. **İnsan kararı:** matematik captcha (HMAC imzalı). AI uyguladı, daha stabil.
+**Not:** Goal Coach backend'de kural tabanlı hesaplama ile yazıldı.
 
 ---
 
-**Prompt 25**
+### Gün 2 — UI ve güvenlik iterasyonları
 
-> Aile bütçesi kısmı içime sinmedi — mantıklı yapsan orayı, emojileri de profesyonel yap
+**Prompt 19–20:** Yazı boyutu ayarlamaları (küçült / hafif büyüt)
 
-**Prompt 26**
+**Prompt 21–24 — Captcha geçişi**
 
-> Çocuk yerine yetişkin vb daha iyi olur — dashboard daha profesyonel olsun sen kıdemli bir UI'cısın
+> Giriş öncesi Cloudflare doğrulaması ekle.  
+> *(Cloudflare localhost'ta çalışmadı)*  
+> Cloudflare yerine sayı toplama doğrulaması koy.
 
-**Yorum:** "Kıdemli UI'cısın" demek Cursor'da işe yarıyor, ciddi.an :D Yetişkin üye etiketleri, koyu sidebar geldi.
-
----
-
-**Prompt 27** *(bozuk ekran SS)*
-
-> Kanka burayı yapmamışsın burayı düzelt diğer yerler aynı kalsın
-
-**Yorum:** Spesifik olmak önemli — "her şeyi değiştir" demedim, **sadece o blok**.
+**Not:** HMAC imzalı matematik captcha uygulandı. Localhost uyumluluğu için daha stabil çözüm.
 
 ---
 
-**Prompt 28**
+**Prompt 25–26 — Arayüz iyileştirme**
 
-> Budget AI ismini değiştir — demo kullanıcı sonay@sonay.com ise "Sonay Kullanıcı" gözüksün
+> Aile bütçesi bölümünü düzenle. "Çocuk" yerine "Yetişkin" etiketi kullan. Dashboard'u daha profesyonel yap.
 
-**Yorum:** Kişiselleştirilmiş demo. Seed'de `ensure_sonay_demo_account` bu yüzden var.
-
----
-
-**Prompt 29**
-
-> Doğrulama kısmı bozuldu sanırım ya
-
-**Yorum:** Seed import eksikliği backend'i çökertmişti. AI log + import düzeltti — **insan testi** şart.
+**Not:** Koyu sidebar, yetişkin üye etiketleri, SVG ikonlara geçiş hazırlığı.
 
 ---
 
-**Prompt 30**
+**Prompt 27–33 — Hedefli düzeltmeler**
 
-> Matrah kısmını kaldır faturalardan — dashboard daha profesyonel — mantıklı güzel emojiler koy
+> Şu ekranı düzelt, diğer yerler aynı kalsın.  
+> Matrah alanını fatura formundan kaldır.  
+> Chatbot panelini büyüt, emojileri sadeleştir.  
+> *(Dashboard tamamen değiştirildi — istenmiyordu)*  
+> Eski haline dön, yalnızca emojileri değiştir.
 
-**Prompt 31:** *Chatbot balonunu büyült, emojileri küçült sade yap*  
-**Prompt 32:** *Daha farklı*  
-**Prompt 33:** *Eski haline dön — sadece emojileri farklı yap demiştim*
-
-**Yorum:** En net **AI vs insan** anı. "Daha farklı" deyince Cursor tüm dashboard'u bento yaptı; ben sadece emoji istemiştim. **Geri aldırdım.** Dokümantasyona da yazılması gereken ders: prompt spesifik olmazsa AI fazla yapar.
-
----
-
-### Gün 2 sabah — Emoji → SVG, Docker, test
-
-**Prompt 34:** *Projeyi nasıl çalıştıracağım backend frontend komutları*  
-**Prompt 35:** *Gelirler kısmının emojisi gözükmüyor* *(Windows ▯ karakteri SS)*  
-**Prompt 36:** *Emojileri renksiz profesyonel yap*  
-**Prompt 37:** *Sadece gelirlerle giderleri değiştir*
-
-**Yorum:** Windows'ta 🪙 emoji patladı. **İnsan kararı:** SVG ikon (`IconIncome`, `IconExpense`). Emoji savaşını burada bıraktık.
+**Not:** Prompt'un spesifik olmaması durumunda AI'ın kapsamı genişlettiği görüldü. "Sadece X değiştir" ifadesi daha doğru sonuç verdi.
 
 ---
 
-**Prompt 38** *(OCR "Sunucuya bağlanılamadı" SS)*
+### Gün 2 — Docker, test, dokümantasyon
 
-> Kanka faturayı yükledikten sonra böyle diyor — yanlış mı çalıştırıyorum uygulamayı ne oluyor
+**Prompt 34–37:** Kurulum komutları, Windows emoji render sorunu → SVG ikon (`IconIncome`, `IconExpense`)
 
-**Yorum:** Backend ayaktaydı; sorun **10 saniyelik fetch timeout**'uydu. OCR 30–90 sn sürüyor. `OCR_TIMEOUT_MS = 120000` — AI önerdi, ben onayladım, düzeldi.
+**Prompt 38 — OCR timeout**
 
----
+> Fatura yükledikten sonra "Sunucuya bağlanılamadı" hatası alıyorum.
 
-**Prompt 39**
-
-> Docker ortamına da almak istiyorum — hoca bağımlılık yüklemeden çalıştırabilsin, nasıl yaparız
-
-**Prompt 40:** *Terminale baksana bi*  
-**Prompt 41:** *Sen yap* *(build'i agent çalıştırsın)*  
-**Prompt 42:** *(Swagger ekranı SS)* *Neden böyle gözüküyor*  
-**Prompt 43:** *Docker'ı çalıştırdım arayüze nereden bakabilirz*  
-**Prompt 44:** *(Docker Desktop SS)* *Burda nasıl çıkarıcam*
-
-**Yorum:** Docker öğrenme eğrisi de günlüğün parçası. `:8000/docs` API, `:8080` asıl UI — karıştırdım, not düştük README'ye.
+**Not:** Sorun backend değil, 10 saniyelik frontend timeout'tu. OCR için `OCR_TIMEOUT_MS = 120000` ayarlandı.
 
 ---
 
-**Prompt 45:** *Test kodu yazdın mı*  
-**Prompt 46:** *Mantıklı olan yerlere test kodu ekler misin*
+**Prompt 39–44 — Docker**
 
-**Yorum:** pytest + 17 test. OCR test edilmedi (ağır); auth, captcha, CRUD, goal coach yeterli dedim.
+> Projeyi Docker'a al; bağımlılık kurulumu olmadan çalışsın.  
+> Build/terminal hataları, arayüz adresi (8080 vs 8000) soruları.
 
----
-
-**Prompt 47**
-
-> Analiz, teknik doküman, kılavuz, AI günlüğü, demo — GitHub README'de SOLID, design pattern, mimari olsun
-
-**Prompt 48** *(bu mesaj)*
-
-> AI günlüğünde prompt'ları yorum havasında yaz — Cursor'dan önce ChatGPT/Gemini/Claude'a sorduklarım da olsun
-
-**Yorum:** Meta: günlüğü günlük yapan prompt :)
+**Not:** `docker-compose.yml`, CPU-only PyTorch, nginx reverse proxy tamamlandı. UI: `:8080`, API docs: `:8000/docs`.
 
 ---
 
-## Bölüm 2 — AI mı İnsan mı? (Özet Tablo)
+**Prompt 45–46 — Testler**
 
-| Konu | AI önerdi / yaptı | Ben düzelttim / karar verdim |
-|------|-------------------|------------------------------|
-| Proje konusu | Alternatif fikirler (ChatGPT) | Aile bütçesini seçtim |
-| FastAPI vs Django | İkisi de mantıklı (Gemini) | FastAPI + Swagger |
-| LLM vs kural ajan | İkisi de (ChatGPT) | Kural tabanlı multi-agent |
-| Cloudflare captcha | Kurulum | **Kaldır** → sayı toplama |
-| Dashboard "daha farklı" | Tam bento redesign | **Geri al** — sadece emoji |
-| Windows emoji | 🪙 | **SVG ikon** |
-| OCR timeout | 10 sn default | **120 sn** |
-| Matrah alanı UI | Göster | **Gizle** (DB kalsın) |
-| Aile rol sistemi | — | **Yapma** (Claude + ben) |
-| Docker CUDA torch | GPU paketleri indirdi | **CPU-only** torch |
-| Demo kullanıcı adı | demo@demo.com | **sonay@sonay.com** |
+> Mantıklı yerlere test kodu ekle.
+
+**Not:** pytest ile 17 test (auth, captcha, CRUD, goal coach). OCR test dışı bırakıldı (ağır bağımlılık).
 
 ---
 
-## Bölüm 3 — Kullanılan Araçlar (Final)
+**Prompt 47 — Dokümantasyon**
 
-| Araç | Ne zaman | Rol |
-|------|----------|-----|
-| **ChatGPT** | Cursor öncesi | Fikir, teknoloji, kapsam |
-| **Gemini** | Cursor öncesi | Mimari karşılaştırma, OCR |
-| **Claude** | Cursor öncesi | Kapsam kesme, Docker risk |
-| **Aile geri bildirimi** | Cursor öncesi | Feature önceliklendirme |
-| **Cursor Composer** | Geliştirme | Kod, Docker, test, docs |
-| **EasyOCR** | Runtime | Fatura OCR (Zor Mod) |
-
-> Production kodunda harici LLM API **çağrılmıyor**. Multi-agent pipeline kural tabanlı; `openai` paketi ileride LLM eklemek için requirements'ta.
+> Analiz, teknik doküman, kılavuz, AI günlüğü, demo hazırla. README'de mimari, SOLID, design pattern olsun.
 
 ---
 
-## Bölüm 4 — Context Dosyaları (Cursor'a verilen bağlam)
+## Bölüm 2 — AI ve Geliştirici Kararları (Özet)
 
-Cursor'a her seferinde sıfırdan anlatmadım; şu dosyalar bağlam oluşturdu:
-
-- `README.md` — kurulum, demo hesap
-- `backend/app/models.py`, `schemas.py` — veri modeli
-- `backend/app/routers/*` — API
-- `backend/app/services/agents/*` — FinansKoç
-- `backend/app/services/ocr_service.py` — OCR
-- `frontend/src/pages/*`, `api.js` — UI
-- `docker-compose.yml` — dağıtım
-- Ekran görüntüleri (`assets/`) — OCR/UI hataları için
-
-**Tipik Cursor prompt kalıbım (sonradan oturttuğum):**
-> Şu dosyaya bak, diğer yerlere dokunma, minimal diff, Türkçe UI kalsın.
+| Konu | AI önerisi / uygulaması | Geliştirici kararı |
+|------|-------------------------|---------------------|
+| Proje konusu | Alternatif fikirler | Aile bütçesi seçildi |
+| FastAPI vs Django | İkisi de uygun | FastAPI + Swagger |
+| LLM vs kural ajan | Her iki yol | Kural tabanlı multi-agent |
+| Cloudflare captcha | Kuruldu | Kaldırıldı → sayı toplama |
+| Dashboard "daha farklı" | Tam redesign | Geri alındı — yalnızca ikon |
+| Windows emoji | Unicode emoji | SVG ikon |
+| OCR timeout | 10 sn | 120 sn |
+| Matrah UI | Göster | Gizlendi (DB alanı korundu) |
+| Aile rol sistemi | — | Yapılmadı |
+| Docker PyTorch | GPU paketleri | CPU-only |
+| Demo hesap | demo@demo.com | sonay@sonay.com |
 
 ---
 
-## Bölüm 5 — Dersler (Hoca okusun diye)
+## Bölüm 3 — Kullanılan Araçlar
 
-1. **Önce AI'a "ne yapmalıyım" sor, sonra Cursor'a "bunu yap" de.** Mimari kararı ChatGPT/Gemini/Claude'da almak, kodu Cursor'da yazmak işe yaradı.
-2. **Prompt spesifik olmazsa AI fazla yapar.** "Daha farklı" → tüm dashboard değişti; "sadece emoji" demek gerekiyordu.
-3. **Demo kısıtları (hoca, Docker, offline) erken belirlenmeli.** SQLite + Docker + kural tabanlı AI bu yüzden.
-4. **Gerçek cihazda test et.** Windows emoji, OCR timeout, Cloudflare localhost — hepsi canlıda çıktı.
-5. **İnsan geri bildirimi (aile) feature listesini AI'dan daha iyi önceliklendirdi.**
+| Araç | Aşama | Rol |
+|------|-------|-----|
+| ChatGPT | Planlama | Fikir, teknoloji, kapsam |
+| Gemini | Planlama | Mimari karşılaştırma, OCR |
+| Claude | Planlama | Kapsam daraltma, Docker risk |
+| Kullanıcı geri bildirimi | Planlama | Özellik önceliklendirme |
+| Cursor Composer | Geliştirme | Kod, Docker, test, dokümantasyon |
+| EasyOCR | Runtime | Fatura OCR |
+
+Production kodunda harici LLM API çağrılmamaktadır. Multi-agent pipeline kural tabanlıdır.
+
+---
+
+## Bölüm 4 — Context Dosyaları
+
+Cursor oturumlarında bağlam sağlayan dosyalar:
+
+- `README.md`, `docker-compose.yml`
+- `backend/app/models.py`, `schemas.py`, `routers/*`, `services/*`
+- `frontend/src/pages/*`, `api.js`
+- Hata ayıklama için ekran görüntüleri
+
+**Sonradan oturmuş prompt kalıbı:**
+> İlgili dosyaya odaklan, minimal diff uygula, Türkçe UI korunsun.
+
+---
+
+## Bölüm 5 — Öğrenilen Dersler
+
+1. Mimari kararları kod yazmadan önce ayrı AI oturumlarında almak, geliştirme sürecini hızlandırdı.
+2. Prompt spesifik olmalı; belirsiz isteklerde AI kapsamı genişletebiliyor.
+3. Demo kısıtları (Docker, offline, tek komut) erken belirlenmeli.
+4. Gerçek cihazda test şart: emoji render, OCR timeout, localhost captcha sorunları canlıda ortaya çıktı.
+5. Kullanıcı geri bildirimi, özellik listesini teknik AI önerilerinden daha iyi önceliklendirdi.
 
 ---
 
@@ -414,8 +322,7 @@ Cursor'a her seferinde sıfırdan anlatmadım; şu dosyalar bağlam oluşturdu:
 - [Cursor IDE](https://cursor.com)
 - [EasyOCR](https://github.com/JaidedAI/EasyOCR)
 - [FastAPI](https://fastapi.tiangolo.com)
-- Cursor oturum transcript: `agent-transcripts/d4da3a21-.../d4da3a21-....jsonl`
 
 ---
 
-*Son güncelleme: Ağustos 2026 — Prompt 48 ile yorum havasında yeniden yazıldı.*
+*Son güncelleme: Ağustos 2026*
